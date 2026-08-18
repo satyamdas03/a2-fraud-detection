@@ -1,3 +1,17 @@
+# Submission Details
+
+## Link to Implementation
+
+Public Google Colab notebook:
+
+https://colab.research.google.com/github/satyamdas03/a2-fraud-detection/blob/main/notebook/fraud_detection.ipynb
+
+GitHub repository:
+
+https://github.com/satyamdas03/a2-fraud-detection
+
+---
+
 # A2 Project Proposal: Credit Card Fraud Detection
 
 ## 1. Task Definition
@@ -32,7 +46,7 @@ Fraud losses on credit and debit cards are estimated in the tens of billions of 
 | Decision rule | A threshold is chosen on a validation set. Scores above the threshold are flagged for review. |
 
 ### 1.5 Dataset
-The ULB Machine Learning Group Credit Card Fraud Detection dataset: 284,807 transactions from European cardholders in September 2013, with 492 confirmed frauds (0.172%). Features are PCA-transformed for privacy. The dataset is loaded directly from OpenML inside the notebook using `sklearn.datasets.fetch_openml`, so the notebook is self-contained and reproducible.
+The ULB Machine Learning Group Credit Card Fraud Detection dataset: 284,807 transactions from European cardholders in September 2013, with 492 confirmed frauds (0.172%). Features are PCA-transformed for privacy. The notebook downloads the CSV directly from a public URL using `urllib.request.urlretrieve`, so it is self-contained and reproducible on Google Colab.
 
 ### 1.6 Research Question
 Can a cost-sensitive gradient-boosted classifier, calibrated with a threshold chosen by validation, outperform naive accuracy-based baselines on this heavily imbalanced fraud detection task?
@@ -317,3 +331,105 @@ The most valuable part of the project was designing the evaluation around the bu
 - NumPy, pandas, scikit-learn, LightGBM, SciPy, Matplotlib
 - Claude Code for code generation, planning, and writing assistance
 - Google Colab target platform for the public notebook
+
+---
+
+# Presentation Materials
+
+# A3 Presentation: Credit Card Fraud Detection
+
+---
+
+## Slide 1: Title
+
+**Credit Card Fraud Detection with Cost-Sensitive Gradient Boosting**
+
+UTS 32513 — Advanced Data Analytics Algorithms
+Assessment 2 / 3
+
+Goal: flag fraudulent card transactions from historical payment data.
+
+---
+
+## Slide 2: Problem Definition
+
+- Input: transaction record with `Time`, `V1`–`V28` (PCA features), `Amount`.
+- Output: fraud probability in [0, 1].
+- Decision: flag transactions above a learned threshold for investigator review.
+- Why ML? Fraud patterns evolve; rules become stale; labeled historical data exists.
+
+Dataset: 284,807 transactions, only 492 frauds (0.172%).
+
+---
+
+## Slide 3: Data Pipeline
+
+- Temporal split: 60% train / 20% validation / 20% test, ordered by `Time`.
+- `Amount` standardized using training statistics.
+- `Time` used only for splitting, not as a model feature.
+
+This prevents leakage from future transactions and matches production deployment.
+
+---
+
+## Slide 4: Model and Training
+
+- Model: LightGBM gradient boosted decision trees.
+- Loss: binary cross-entropy.
+- Class weighting: `balanced` to compensate for rare frauds.
+- Hyperparameters tuned by randomized search (15 candidates, 3-fold CV) using average precision.
+
+Best settings: depth 4, 583 trees, learning rate 0.175, large leaf regularization.
+
+---
+
+## Slide 5: Evaluation and Threshold
+
+Training loss ≠ business objective.
+
+- Missing fraud is far more expensive than a false alarm.
+- We optimize the classification threshold on validation data to minimize total cost:
+
+```
+total_cost = 100 * FN + 10 * FP
+```
+
+Chosen threshold: 0.004, not 0.5.
+
+---
+
+## Slide 6: Test Results
+
+| Metric | Value |
+|--------|-------|
+| AUROC | 0.966 |
+| Average Precision | 0.806 |
+| Precision | 0.711 |
+| Recall | 0.787 |
+| F1 | 0.747 |
+| Accuracy | 0.999 |
+| Precision@100 | 0.60 |
+
+Accuracy is misleading; ranking and cost metrics matter more.
+
+---
+
+## Slide 7: Limitations and Future Work
+
+- Dataset is from 2013; modern fraud differs.
+- Features are anonymized PCA components.
+- Static model; needs retraining for concept drift.
+- Future: instance-specific costs by transaction amount, real-time monitoring, feedback loop.
+
+---
+
+## Anticipated Q&A
+
+Q: Why not use SMOTE to balance the data?
+A: SMOTE creates synthetic fraud examples that may not follow real feature distributions. Class weighting and threshold tuning avoid inventing fake data.
+
+Q: Why is the threshold so low (0.004)?
+A: Because false negatives cost 10x more than false positives. A low threshold catches more frauds at the cost of more false alarms.
+
+Q: Why LightGBM instead of a neural network?
+A: For tabular data of this size, tree ensembles generally train faster and perform better than small neural nets, and they are easier to interpret.

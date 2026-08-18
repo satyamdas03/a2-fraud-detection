@@ -32,7 +32,7 @@ Fraud losses on credit and debit cards are estimated in the tens of billions of 
 | Decision rule | A threshold is chosen on a validation set. Scores above the threshold are flagged for review. |
 
 ### 1.5 Dataset
-The ULB Machine Learning Group Credit Card Fraud Detection dataset: 284,807 transactions from European cardholders in September 2013, with 492 confirmed frauds (0.172%). Features are PCA-transformed for privacy. The dataset is loaded directly from OpenML inside the notebook using `sklearn.datasets.fetch_openml`, so the notebook is self-contained and reproducible.
+The ULB Machine Learning Group Credit Card Fraud Detection dataset: 284,807 transactions from European cardholders in September 2013, with 492 confirmed frauds (0.172%). Features are PCA-transformed for privacy. The notebook downloads the CSV directly from a public URL using `urllib.request.urlretrieve`, so it is self-contained and reproducible on Google Colab.
 
 ### 1.6 Research Question
 Can a cost-sensitive gradient-boosted classifier, calibrated with a threshold chosen by validation, outperform naive accuracy-based baselines on this heavily imbalanced fraud detection task?

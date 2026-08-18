@@ -1,6 +1,6 @@
 import markdown
 
-with open("a2_fraud_detection/report/combined_report.md", "r", encoding="utf-8") as f:
+with open("report/combined_report.md", "r", encoding="utf-8") as f:
     md_text = f.read()
 
 html_body = markdown.markdown(md_text, extensions=["tables", "fenced_code"])
@@ -35,7 +35,7 @@ pre {{ background-color: #f4f4f4; padding: 12px; overflow-x: auto; }}
 </html>
 """
 
-with open("a2_fraud_detection/report/combined_report.html", "w", encoding="utf-8") as f:
+with open("report/combined_report.html", "w", encoding="utf-8") as f:
     f.write(html)
 
 print("HTML generated.")
